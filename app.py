@@ -6,9 +6,13 @@ import pandas as pd
 import plotly.express as px
 
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
+from pages.page_candidatos import candidatos
+from pages.bus import bus
+
+app = dash.Dash(__name__, external_stylesheets=[
+                dbc.themes.FLATLY], suppress_callback_exceptions=True)
 
 df = pd.read_csv("urnas.csv")
 dft = pd.read_csv("resultado.csv")
@@ -16,111 +20,11 @@ dfbu = pd.read_csv("bu_recebido.csv")
 filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
-components = [html.Div([dbc.Col([
+total_circulos = 200
+circulos_brancos = 0
 
-    html.H4(id="nome_cidade"),
-]),
+components = [candidatos(), bus(total_circulos, circulos_brancos)]
 
-    dbc.Col([
-
-        html.H5("Candidatos"),
-
-
-    ]),
-
-    dbc.Row(
-    [
-        dbc.Col(
-            [
-
-                dbc.Row(
-                    dcc.Graph(
-                        id="resultado",
-                        style={
-                            "height": "300px",
-                            "overflowY": "scroll"},
-                    ),
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.Row(
-                                            [
-                                                html.H5(
-                                                    "Votos Brancos",
-                                                    style={
-                                                        "color": "#053F63", "fontWeight": "bold"}
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            html.H5(
-                                                id="total_urnas",
-                                                style={"color": "#053F63", "fontWeight": "bold"})
-                                        )
-                                    ],
-                                    style={
-                                        "backgroundColor": "#FFCD00", },
-                                    className="p-4 mb-2 text-center shadow-sm",
-                                ),
-                            ],
-                        ),
-                        dbc.Col([
-                            dbc.Card(
-                                [
-                                    dbc.Row(
-                                        [
-                                            html.H5(
-                                                "Votos Nulos",
-                                                style={
-                                                    "color": "#053F63", "fontWeight": "bold"}
-                                            )
-                                        ]
-                                    ),
-                                    dbc.Row(
-                                        html.H5(
-                                            id="total_secoes",
-                                            style={"color": "#053F63", "fontWeight": "bold"})
-                                    ),
-                                ],
-                                style={
-                                    "backgroundColor": "#FFCD00", },
-                                className="p-4 text-center shadow-sm",
-                            ),
-                        ]),
-                        dbc.Col([
-                            dbc.Card(
-                                [
-                                    dbc.Row(
-                                        [
-                                            html.H5(
-                                                "Votos Válidos",
-                                                style={
-                                                    "color": "#053F63", "fontWeight": "bold"}
-                                            )
-                                        ]
-                                    ),
-                                    dbc.Row(
-                                        html.H5(
-                                            id="total_votos",
-                                            style={"color": "#053F63", "fontWeight": "bold"})
-                                    ),
-                                ],
-                                style={
-                                    "backgroundColor": "#FFCD00", },
-                                className="p-4 text-center shadow-sm",
-                            ),
-                        ])
-                    ],
-                ),
-
-            ],
-        ),
-    ],
-)]), html.H1("hello world")]
 
 app.layout = html.Div(
     [

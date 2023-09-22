@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas_id">
+
+    </canvas>
+</body>
+
+<script>
+    var canvas = document.getElementById("canvas_id");
+    var ctx = canvas.getContext("2d");
+
+    // Limpar o canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Variáveis
+    var totalCirculos = 30;
+    var circulosBrancos = 0;
+    var raio = 10;
+    var espaco = 10;
+
+    // Desenhar os círculos
+    for (var i = 0; i < totalCirculos; i++) {
+        var x = (i % 10) * (raio * 2 + espaco) + raio + espaco;
+        var y = Math.floor(i / 10) * (raio * 2 + espaco) + raio + espaco;
+
+        ctx.beginPath();
+        ctx.arc(x, y, raio, 0, Math.PI * 2);
+
+        if (i < circulosBrancos) {
+            ctx.fillStyle = "white";
+        } else {
+            ctx.fillStyle = "blue";
+        }
+
+        ctx.fill();
+        ctx.closePath();
+    }
+</script>
+
+</html>
