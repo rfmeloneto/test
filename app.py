@@ -16,6 +16,111 @@ dfbu = pd.read_csv("bu_recebido.csv")
 filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
+components = [html.Div([dbc.Col([
+
+    html.H4(id="nome_cidade"),
+]),
+
+    dbc.Col([
+
+        html.H5("Candidatos"),
+
+
+    ]),
+
+    dbc.Row(
+    [
+        dbc.Col(
+            [
+
+                dbc.Row(
+                    dcc.Graph(
+                        id="resultado",
+                        style={
+                            "height": "300px",
+                            "overflowY": "scroll"},
+                    ),
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dbc.Card(
+                                    [
+                                        dbc.Row(
+                                            [
+                                                html.H5(
+                                                    "Votos Brancos",
+                                                    style={
+                                                        "color": "#053F63", "fontWeight": "bold"}
+                                                )
+                                            ]
+                                        ),
+                                        dbc.Row(
+                                            html.H5(
+                                                id="total_urnas",
+                                                style={"color": "#053F63", "fontWeight": "bold"})
+                                        )
+                                    ],
+                                    style={
+                                        "backgroundColor": "#FFCD00", },
+                                    className="p-4 mb-2 text-center shadow-sm",
+                                ),
+                            ],
+                        ),
+                        dbc.Col([
+                            dbc.Card(
+                                [
+                                    dbc.Row(
+                                        [
+                                            html.H5(
+                                                "Votos Nulos",
+                                                style={
+                                                    "color": "#053F63", "fontWeight": "bold"}
+                                            )
+                                        ]
+                                    ),
+                                    dbc.Row(
+                                        html.H5(
+                                            id="total_secoes",
+                                            style={"color": "#053F63", "fontWeight": "bold"})
+                                    ),
+                                ],
+                                style={
+                                    "backgroundColor": "#FFCD00", },
+                                className="p-4 text-center shadow-sm",
+                            ),
+                        ]),
+                        dbc.Col([
+                            dbc.Card(
+                                [
+                                    dbc.Row(
+                                        [
+                                            html.H5(
+                                                "Votos Válidos",
+                                                style={
+                                                    "color": "#053F63", "fontWeight": "bold"}
+                                            )
+                                        ]
+                                    ),
+                                    dbc.Row(
+                                        html.H5(
+                                            id="total_votos",
+                                            style={"color": "#053F63", "fontWeight": "bold"})
+                                    ),
+                                ],
+                                style={
+                                    "backgroundColor": "#FFCD00", },
+                                className="p-4 text-center shadow-sm",
+                            ),
+                        ])
+                    ],
+                ),
+
+            ],
+        ),
+    ],
+)]), html.H1("hello world")]
 
 app.layout = html.Div(
     [
@@ -27,7 +132,8 @@ app.layout = html.Div(
                     ], width=1),
                     dbc.Col([
                         html.Img(
-                            src="assets/envia_bu_logo.svg",
+                            src="assets/integravoto.svg",
+                            style={"height": "100px"},
                         ),
 
                     ], width=3, className="ms-20"),
@@ -97,108 +203,30 @@ app.layout = html.Div(
         dbc.Row(
             [
                 dbc.Col(
-                    [
+                    [dbc.RadioItems(
+                        id="radio",
+                        options=[
+                            {"label": "Candidatos", "value": 0},
+                            {"label": "Bu's", "value": 1},
+                        ],
+                        value=0,
+                        inline=True
+                    ),
                         dbc.Card(
                             [
-                                dbc.Col([
+                                html.Div(id="components", children=[]),
 
-                                    html.H4(id="nome_cidade"),
-                                ]),
-
-                                dbc.Col([
-
-                                        html.H5("Candidatos"),
-
-
-                                        ]),
-
-                                dbc.Row(
-                                    [
-                                        dbc.Col(
-                                            [
-
-                                                dbc.Row(
-                                                    dcc.Graph(
-                                                        id="resultado",
-                                                        style={
-                                                            "height": "300px",
-                                                            "overflowY": "scroll"},
-                                                    ),
-                                                ),
-                                                dbc.Row(
-                                                    [
-                                                        dbc.Col(
-                                                            [
-                                                                dbc.Card(
-                                                                    [
-                                                                        dbc.Row(
-                                                                            [
-                                                                                html.H5(
-                                                                                    "Total de Urnas Apuradas"
-                                                                                )
-                                                                            ]
-                                                                        ),
-                                                                        dbc.Row(
-                                                                            html.H5(
-                                                                                id="total_urnas")
-                                                                        ),
-                                                                    ],
-                                                                    className="p-4 text-center shadow-sm",
-                                                                ),
-                                                            ],
-                                                        ),
-                                                        dbc.Col([
-                                                            dbc.Card(
-                                                                [
-                                                                    dbc.Row(
-                                                                        [
-                                                                            html.H5(
-                                                                                "Total de Seções Apuradas"
-                                                                            )
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Row(
-                                                                        html.H5(
-                                                                            id="total_secoes")
-                                                                    ),
-                                                                ],
-                                                                className="p-4 text-center shadow-sm",
-                                                            ),
-                                                        ]),
-                                                        dbc.Col([
-                                                            dbc.Card(
-                                                                [
-                                                                    dbc.Row(
-                                                                        [
-                                                                            html.H5(
-                                                                                "Total de Votos Apurados"
-                                                                            )
-                                                                        ]
-                                                                    ),
-                                                                    dbc.Row(
-                                                                        html.H5(
-                                                                            id="total_votos")
-                                                                    ),
-                                                                ],
-                                                                className="p-4 text-center shadow-sm",
-                                                            ),
-                                                        ])
-                                                    ],
-                                                ),
-
-                                            ],
-                                        ),
-                                    ],
-                                ),
                             ],
                             style={"height": "500px"}
-                        ),
+                    ),
                     ],
                     className="p-3",
                 ),
                 dbc.Col(
                     [
-                        dcc.Graph(id="map"),
+                        html.Div(dcc.Graph(id="map", style={'overflow': 'scroll'}),
+                                 ),
+
                     ]
                 ),
             ],
@@ -226,6 +254,11 @@ app.layout = html.Div(
 
 
 )
+
+
+@app.callback(Output("components", "children"), Input("radio", "value"))
+def update_components(value):
+    return components[value]
 
 
 @app.callback(Output("map", "figure"), Input("dropdown-estado", "value"))
@@ -307,6 +340,7 @@ def update_resultado(value):
 
     sorted_values = non_empty_values[non_empty_values != ""].astype(
         str).sort_values(ascending=True)
+    sorted_values = sorted_values.drop(columns=["cidade"])
     df_sorted = pd.DataFrame({
         "Candidato": sorted_values.index,
         "Votos": sorted_values.values
@@ -316,11 +350,14 @@ def update_resultado(value):
         x=sorted_values.index,
         y=sorted_values.values,
         color=sorted_values.index,
-        text=df_sorted['Candidato'],
+        text="Candidato "+df_sorted['Candidato'] + " / " +
+        df_sorted['Votos'].astype(str) + " votos",
         orientation="h",
+        height=300
+
     )
     fig.update_layout(showlegend=False, xaxis_visible=False,
-                      yaxis_visible=False)
+                      yaxis_visible=False, )
     return fig
 
 
