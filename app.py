@@ -4,6 +4,7 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objs as go
 
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -21,9 +22,9 @@ filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
 total_circulos = 200
-circulos_brancos = 0
+circulos_amarelos = 3
 
-components = [candidatos(), bus(total_circulos, circulos_brancos)]
+components = [candidatos(), bus(total_circulos, circulos_amarelos)]
 
 
 app.layout = html.Div(
@@ -121,15 +122,16 @@ app.layout = html.Div(
                                 html.Div(id="components", children=[]),
 
                             ],
-                            style={"height": "500px"}
+                            style={"height": "500px",
+                                   "background-color": "#D9D9D9"},
                     ),
                     ],
                     className="p-3",
                 ),
                 dbc.Col(
                     [
-                        html.Div(dcc.Graph(id="map", style={'overflow': 'scroll'}),
-                                 ),
+                        html.Div(dcc.Graph(id="map")),
+
 
                     ]
                 ),
@@ -200,6 +202,7 @@ def update_map(estado):
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         coloraxis_colorbar=dict(title="Contagem de Urnas"),
+
     )
 
     return fig
@@ -257,11 +260,15 @@ def update_resultado(value):
         text="Candidato "+df_sorted['Candidato'] + " / " +
         df_sorted['Votos'].astype(str) + " votos",
         orientation="h",
-        height=300
+        height=300,
+        template="plotly_dark"
 
     )
     fig.update_layout(showlegend=False, xaxis_visible=False,
-                      yaxis_visible=False, )
+                      yaxis_visible=False,
+                      paper_bgcolor="rgba(0,0,0,0)",
+                      plot_bgcolor="rgba(0,0,0,0)",
+                      )
     return fig
 
 
