@@ -1,5 +1,33 @@
-"cidade","urnas_apuradas","secoes_apuradas","votos_apurados","100","101","102","103","104","105","106","107","108","109","110"
-"Palmas",80,20,302,1,3,4,,,
-"Araguaína",90,30,100,,,34,23,90,45
-"Gurupi",70,20,134,22,50,,54,34,20
-"Porto Nacional",80,21,154,22,10,15,20,14,12,52,45,12,87,38
+"cidade","candidato","votos"
+"Palmas","100",43
+"Palmas","101",54
+"Palmas","102",60
+"Gurupi","100",56
+"Gurupi","108",51
+"Gurupi","102",98
+"Gurupi","104",45
+"Gurupi","202",32
+"Araguaína",100,34
+"Araguaína",101,34
+"Araguaína",102,35
+"Porto Nacional","120",25
+"Porto Nacional","215",35
+"Porto Nacional","187",32
+"Porto Nacional","197",24
+"Porto Nacional","102",32
+"Porto Nacional","104",53
+"Porto Nacional","145",32
+"Porto Nacional","189",25
+"Porto Nacional","132",27
+"Porto Nacional","133",28
+"Porto Nacional","134",57
+"Porto Nacional","135",28
+"Porto Nacional","136",47
+"Porto Nacional","137",98
+"Porto Nacional","138",99
+"Porto Nacional","139",28
+"Porto Nacional","140",12
+"Porto Nacional","141",24
+"Porto Nacional","142",27
+"Porto Nacional","143",58
+"Porto Nacional","144",60

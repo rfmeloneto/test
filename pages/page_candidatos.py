@@ -1,5 +1,7 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+import pandas as pd
+import dash_ag_grid as dag
 
 
 def candidatos():
@@ -20,14 +22,13 @@ def candidatos():
             dbc.Col(
                 [
 
-                    dbc.Row(
-                        dcc.Graph(
-                            id="resultado",
-                            style={
-                                "height": "300px",
-                                "overflowY": "scroll"},
-                        ),
-                    ),
+                    dbc.Row([
+
+                        html.Div(
+                            id="grid",
+                        )
+
+                    ]),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -45,7 +46,7 @@ def candidatos():
                                             ),
                                             dbc.Row(
                                                 html.H5(
-                                                    id="total_urnas",
+                                                    id="votos_brancos",
                                                     style={"color": "#053F63", "fontWeight": "bold"})
                                             )
                                         ],
@@ -69,7 +70,7 @@ def candidatos():
                                         ),
                                         dbc.Row(
                                             html.H5(
-                                                id="total_secoes",
+                                                id="votos_nulos",
                                                 style={"color": "#053F63", "fontWeight": "bold"})
                                         ),
                                     ],
@@ -92,7 +93,7 @@ def candidatos():
                                         ),
                                         dbc.Row(
                                             html.H5(
-                                                id="total_votos",
+                                                id="votos_validos",
                                                 style={"color": "#053F63", "fontWeight": "bold"})
                                         ),
                                     ],

@@ -4,10 +4,10 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objs as go
+import dash_ag_grid as dag
 
 from dash import dcc, html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 from pages.page_candidatos import candidatos
 from pages.bus import bus
@@ -15,16 +15,20 @@ from pages.bus import bus
 app = dash.Dash(__name__, external_stylesheets=[
                 dbc.themes.FLATLY], suppress_callback_exceptions=True)
 
+app.title = 'IntegraVoto'
+app._favicon = "asserts/favicon.ico"
+
 df = pd.read_csv("urnas.csv")
 dft = pd.read_csv("resultado.csv")
-dfbu = pd.read_csv("bu_recebido.csv")
+df_brancos_nulos = pd.read_csv("brancos_nulos.csv")
 filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
 total_circulos = 200
 circulos_amarelos = 30
 
-components = [candidatos(), bus(total_circulos, circulos_amarelos)]
+components = [candidatos(), bus(
+    total_circulos, circulos_amarelos)]
 
 
 app.layout = html.Div(
@@ -37,7 +41,7 @@ app.layout = html.Div(
                     ], width=1),
                     dbc.Col([
                         html.Img(
-                            src="assets/integravoto_deitado.svg",
+                            src="assets/integravoto.svg",
                             style={"height": "100px"},
                         ),
 
@@ -136,6 +140,7 @@ app.layout = html.Div(
                     ]
                 ),
             ],
+
         ),
         dbc.Navbar(
             dbc.Container(
@@ -160,6 +165,23 @@ app.layout = html.Div(
 
 
 )
+
+
+@app.callback(
+    Output('table', 'data'),
+    Input('cidade-dropdown', 'value')
+)
+def update_table(cidade):
+    # Filtra o DataFrame com base na cidade selecionada
+    filtered_df = df[df['Cidade'] == cidade]
+
+    # Remove as colunas dos candidatos que não têm votos na cidade filtrada
+    filtered_df = filtered_df.loc[:, (filtered_df != 0).any()]
+
+    # Converte o DataFrame filtrado em uma lista de dicionários para uso no AgGrid
+    data = filtered_df.to_dict('records')
+
+    return data
 
 
 @app.callback(Output("components", "children"), Input("radio", "value"))
@@ -214,62 +236,47 @@ def update_nome_cidade(value):
 
 
 @app.callback(
-    Output("total_urnas", "children"),
+    Output("votos_brancos", "children"),
     Input("dropdown-cidade", "value"),
 )
-def update_total_urnas(value):
-    return (dft[dft["cidade"] == value]["urnas_apuradas"].sum(),)
+def update_votos_brancos(value):
+    return (df_brancos_nulos[df_brancos_nulos["cidade"] == value]["votos_brancos"].sum(),)
 
 
 @app.callback(
-    Output("total_secoes", "children"),
+    Output("votos_nulos", "children"),
     Input("dropdown-cidade", "value"),
 )
-def update_total_secoes(value):
-    return (dft[dft["cidade"] == value]["secoes_apuradas"].sum(),)
+def update_votos_nulos(value):
+    return (df_brancos_nulos[df_brancos_nulos["cidade"] == value]["votos_nulos"].sum(),)
 
 
 @app.callback(
-    Output("total_votos", "children"),
+    Output("votos_validos", "children"),
     Input("dropdown-cidade", "value"),
 )
-def update_total_votos(value):
-    return (dft[dft["cidade"] == value]["votos_apurados"].sum(),)
+def update_votos_validos(value):
+    return (dft[dft["cidade"] == value]["votos"].sum(),)
 
 
-@app.callback(Output("resultado", "figure"), Input("dropdown-cidade", "value"))
+@app.callback(Output("grid", "children"), Input("dropdown-cidade", "value"))
 def update_resultado(value):
-    df_filtered = dft.drop(
-        ["urnas_apuradas", "secoes_apuradas", "votos_apurados"], axis=1
-    )
-    df_city = df_filtered[df_filtered["cidade"] == value]
-    non_empty_values = df_city.iloc[0].dropna()
+    df_city = dft[dft["cidade"] == value].sort_values(
+        by="votos", ascending=False)
+    colocados = [i+1 for i in range(0, len(df_city["candidato"].unique()))]
+    df_city['colocacao'] = colocados
+    return dag.AgGrid(
+        columnDefs=[
+            {"headerName": "Posição", "field": "colocacao"},
+            {"headerName": "Candidato", "field": "candidato"},
+            {"headerName": "Votos", "field": "votos"},
+        ],
+        rowData=df_city.to_dict(orient="records"),
+        style={"height": "300px", "width": "100%"},
 
-    sorted_values = non_empty_values[non_empty_values != ""].astype(
-        str).sort_values(ascending=True)
-    sorted_values = sorted_values.drop(columns=["cidade"])
-    df_sorted = pd.DataFrame({
-        "Candidato": sorted_values.index,
-        "Votos": sorted_values.values
-    })
 
-    fig = px.bar(
-        x=sorted_values.index,
-        y=sorted_values.values,
-        color=sorted_values.index,
-        text="Candidato "+df_sorted['Candidato'] + " / " +
-        df_sorted['Votos'].astype(str) + " votos",
-        orientation="h",
-        height=300,
-        template="plotly_dark"
 
     )
-    fig.update_layout(showlegend=False, xaxis_visible=False,
-                      yaxis_visible=False,
-                      paper_bgcolor="rgba(0,0,0,0)",
-                      plot_bgcolor="rgba(0,0,0,0)",
-                      )
-    return fig
 
 
 if __name__ == "__main__":
