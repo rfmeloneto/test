@@ -22,7 +22,7 @@ filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
 total_circulos = 200
-circulos_amarelos = 3
+circulos_amarelos = 30
 
 components = [candidatos(), bus(total_circulos, circulos_amarelos)]
 
@@ -37,7 +37,7 @@ app.layout = html.Div(
                     ], width=1),
                     dbc.Col([
                         html.Img(
-                            src="assets/integravoto.svg",
+                            src="assets/integravoto_deitado.svg",
                             style={"height": "100px"},
                         ),
 
