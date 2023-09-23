@@ -134,10 +134,14 @@ app.layout = html.Div(
                 ),
                 dbc.Col(
                     [
-                        html.Div(dcc.Graph(id="map")),
+                        html.Div(dcc.Graph(id="map"),
+                                 style={"height": "500px",
+                                        "width": "700px", "margin-left": "20%"},
+                                 ),
 
 
-                    ]
+                    ],
+
                 ),
             ],
 
@@ -272,7 +276,8 @@ def update_resultado(value):
             {"headerName": "Votos", "field": "votos"},
         ],
         rowData=df_city.to_dict(orient="records"),
-        style={"height": "300px", "width": "100%"},
+        columnSize="sizeToFit",
+        style={"height": "360px", "width": "100%", "justify": "center"},
 
 
 

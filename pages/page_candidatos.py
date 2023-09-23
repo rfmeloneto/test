@@ -27,85 +27,86 @@ def candidatos():
                         html.Div(
                             id="grid",
                         )
+                    ]),
+                ],
 
+            ),
+
+            dbc.Col(
+                [
+                    dbc.Row([
+                        dbc.Card(
+                            [
+                                dbc.Row(
+                                    [
+                                        html.H5(
+                                            "Votos Válidos",
+                                            style={
+                                                "color": "#053F63", "fontWeight": "bold"}
+                                        )
+                                    ]
+                                ),
+                                dbc.Row(
+                                    html.H5(
+                                        id="votos_validos",
+                                        style={"color": "#053F63", "fontWeight": "bold"}),
+
+                                ),
+                            ],
+                            style={
+                                "backgroundColor": "#FFCD00", "width": "95%"},
+                            className="p-4 mb-2 text-center shadow-sm",
+                        ),
                     ]),
                     dbc.Row(
                         [
-                            dbc.Col(
+                            dbc.Card(
                                 [
-                                    dbc.Card(
+                                    dbc.Row(
                                         [
-                                            dbc.Row(
-                                                [
-                                                    html.H5(
-                                                        "Votos Brancos",
-                                                        style={
-                                                            "color": "#053F63", "fontWeight": "bold"}
-                                                    )
-                                                ]
-                                            ),
-                                            dbc.Row(
-                                                html.H5(
-                                                    id="votos_brancos",
-                                                    style={"color": "#053F63", "fontWeight": "bold"})
+                                            html.H5(
+                                                "Votos Brancos",
+                                                style={
+                                                    "color": "#053F63", "fontWeight": "bold"}
                                             )
-                                        ],
-                                        style={
-                                            "backgroundColor": "#FFCD00", },
-                                        className="p-4 mb-2 text-center shadow-sm",
+                                        ]
                                     ),
+                                    dbc.Row(
+                                        html.H5(
+                                            id="votos_brancos",
+                                            style={"color": "#053F63", "fontWeight": "bold"})
+                                    )
                                 ],
+                                style={
+                                    "backgroundColor": "#FFCD00", "width": "95%"},
+                                className="p-4 mb-2 text-center shadow-sm",
                             ),
-                            dbc.Col([
-                                dbc.Card(
-                                    [
-                                        dbc.Row(
-                                            [
-                                                html.H5(
-                                                    "Votos Nulos",
-                                                    style={
-                                                        "color": "#053F63", "fontWeight": "bold"}
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            html.H5(
-                                                id="votos_nulos",
-                                                style={"color": "#053F63", "fontWeight": "bold"})
-                                        ),
-                                    ],
-                                    style={
-                                        "backgroundColor": "#FFCD00", },
-                                    className="p-4 text-center shadow-sm",
-                                ),
-                            ]),
-                            dbc.Col([
-                                dbc.Card(
-                                    [
-                                        dbc.Row(
-                                            [
-                                                html.H5(
-                                                    "Votos Válidos",
-                                                    style={
-                                                        "color": "#053F63", "fontWeight": "bold"}
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            html.H5(
-                                                id="votos_validos",
-                                                style={"color": "#053F63", "fontWeight": "bold"})
-                                        ),
-                                    ],
-                                    style={
-                                        "backgroundColor": "#FFCD00", },
-                                    className="p-4 text-center shadow-sm",
-                                ),
-                            ])
                         ],
                     ),
-
-                ],
-            ),
+                    dbc.Row([
+                        dbc.Card(
+                            [
+                                dbc.Row(
+                                    [
+                                        html.H5(
+                                            "Votos Nulos",
+                                            style={
+                                                "color": "#053F63", "fontWeight": "bold"}
+                                        )
+                                    ]
+                                ),
+                                dbc.Row(
+                                    html.H5(
+                                        id="votos_nulos",
+                                        style={"color": "#053F63", "fontWeight": "bold"})
+                                ),
+                            ],
+                            style={
+                                "backgroundColor": "#FFCD00", "width": "95%"},
+                            className="p-4 text-center shadow-sm",
+                        ),
+                    ]),
+                ]
+            )
         ],
     )])
