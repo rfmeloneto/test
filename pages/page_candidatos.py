@@ -13,8 +13,10 @@ def candidatos():
         dbc.Col([
 
             html.H5("Candidatos"),
+        ]),
+        dbc.Col([
 
-
+            dbc.Button("Relatório", id="grid-modal-print-btn"),
         ]),
 
         dbc.Row(

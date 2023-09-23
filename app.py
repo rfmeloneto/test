@@ -24,8 +24,8 @@ df_brancos_nulos = pd.read_csv("brancos_nulos.csv")
 filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
-total_circulos = 200
-circulos_amarelos = 30
+total_circulos = 150
+circulos_amarelos = 28
 
 components = [candidatos(), bus(
     total_circulos, circulos_amarelos)]
@@ -136,7 +136,8 @@ app.layout = html.Div(
                     [
                         html.Div(dcc.Graph(id="map"),
                                  style={"height": "500px",
-                                        "width": "700px", "margin-left": "20%"},
+                                        "width": "700px", "margin-left": "10%",
+                                        "margin-top": "5%"},
                                  ),
 
 
