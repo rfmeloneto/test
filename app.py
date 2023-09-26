@@ -30,6 +30,7 @@ url_pleitos = os.getenv("PLEITOS_ATIVOS")
 pleitos = requests.get(url_pleitos).json()
 df_pleitos = pd.DataFrame(pleitos)
 
+
 # DataSource dos Candidatos - Carrega as informações dos Resultados
 
 
@@ -272,8 +273,8 @@ def load_city(uf):
     Input('dropdown-cidade', 'value')
 )
 def load_regiao(cidade):
-    regioes = df_pleitos[df_pleitos['id'] == cidade]['regiao']
-    regiao = ast.literal_eval(regioes[0])
+    regioes = df_pleitos.loc[df_pleitos['id'] == cidade, 'regiao']
+    regiao = ast.literal_eval(regioes.iloc[0])
     options = [{"label": r, "value": r} for r in regiao]
     return options, regiao[0]
 
