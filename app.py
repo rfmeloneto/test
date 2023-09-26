@@ -46,6 +46,14 @@ def update_cidade(uf):
     return options, id[0]
 
 
+def update_cidade_title(cidade):
+    url_pleitos = os.getenv("PLEITOS_ATIVOS")
+    pleitos = requests.get(url_pleitos).json()
+    df_pleitos = pd.DataFrame(pleitos)
+    cidades = df_pleitos[df_pleitos['id'] == cidade]['cidade'].unique()
+    return cidades[0]
+
+
 def update_regiao(cidade):
     url_pleitos = os.getenv("PLEITOS_ATIVOS")
     pleitos = requests.get(url_pleitos).json()
@@ -75,6 +83,7 @@ def update_table(cidade, regiao):
         rowData=df_city.to_dict(orient="records"),
         columnSize="sizeToFit",
         style={"height": "360px", "width": "100%", "justify": "center"},
+
 
     )
 
@@ -142,13 +151,14 @@ def toggle_modal(n1, is_open):
 
 app.layout = html.Div(
     [
-        dbc.Button("Extra large modal", id="open-xl", n_clicks=0),
-        dbc.Modal(
+
+        html.Div([dbc.Modal(
             [
+                dbc.Button("print", id="print-btn"),
                 dbc.ModalHeader(html.Div([
                     dbc.Row([
                         dbc.Col([
-                            html.Img(src="assets/integravoto.svg"),
+                            html.Img(src="assets/integravoto_preto.svg"),
                         ]),
                         dbc.Col([
                             dbc.Row(
@@ -156,18 +166,18 @@ app.layout = html.Div(
                             dbc.Row(
                                 html.H6("Eleição de Conselho Tutelar - 2023")),
 
-                        ])
-
+                        ]),
                     ]
                     )
                 ])),
                 dbc.ModalBody([], id="grid-modal"),
             ],
             id="modal-xl",
-            size="xl",
+            # fullscreen=True,
+            size="lg",
             is_open=False,
-        ),
-
+        ), ]),
+        html.Div([], id="dummy"),
         dcc.Interval(
             id='interval-component',
             interval=60 * 1000,
@@ -236,6 +246,7 @@ app.layout = html.Div(
         dbc.Row(
             [
                 dbc.Col(
+
                     [dbc.RadioItems(
                         id="radio",
                         options=[
@@ -245,6 +256,7 @@ app.layout = html.Div(
                         value=0,
                         inline=True
                     ),
+
                         dbc.Card(
                             [
                                 html.Div(id="components", children=[]),
@@ -340,10 +352,7 @@ def update_map(estado, n):
 
 @app.callback(Output("nome_cidade", "children"), Input("dropdown-cidade", "value"))
 def update_nome_cidade(value):
-    '''
-    TODO:: FIX THIS
-    '''
-    return value
+    return update_cidade_title(value)
 
 
 @app.callback(
@@ -390,5 +399,13 @@ def open_modal(n1, cidade, regiao, is_open):
     return toggle_modal(n1, is_open), update_table(cidade, regiao)
 
 
+# @app.callback(Output("dummy", "children"), Input("print-btn", "n_clicks"),)
+# app.clientside_callback(
+#     """
+#         document.getElementById("print-btn").addEventListener("click", function() {
+#             window.print();
+#         });
+#         """
+# )
 if __name__ == "__main__":
     app.run_server(debug=True)

@@ -16,7 +16,6 @@ def candidatos():
         ]),
         dbc.Col([
 
-            dbc.Button("Relatório", id="grid-modal-print-btn"),
         ]),
 
         dbc.Row(
@@ -30,6 +29,8 @@ def candidatos():
                             id="grid",
                         )
                     ]),
+                    dbc.Button("Relatório", id="open-xl",
+                               n_clicks=0, className="mt-4"),
                 ],
 
             ),
