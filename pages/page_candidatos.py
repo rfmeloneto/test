@@ -29,11 +29,11 @@ def candidatos():
                             id="grid",
                         )
                     ]),
-                    dbc.Button("Relatório", id="open-xl",
+                    dbc.Button("Tabela", id="open-xl",
                                n_clicks=0, className="mt-4"),
                 ],
 
-            ),
+                width=9),
 
             dbc.Col(
                 [

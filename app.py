@@ -143,6 +143,30 @@ def bus_page(cidade):
     return bus(qtd_urna[0], bu_recebidos[0])
 
 
+def brancos(cidade):
+    url_brancos = os.getenv("BRANCOS_NULOS")
+    brancos = requests.get(url_brancos).json()
+    df_brancos = pd.DataFrame(brancos)
+    brancos = df_brancos.loc[df_brancos["cidade"] == cidade, "brancos"].sum()
+    return brancos
+
+
+def nulos(cidade):
+    url_nulos = os.getenv("BRANCOS_NULOS")
+    nulos = requests.get(url_nulos).json()
+    df_nulos = pd.DataFrame(nulos)
+    nulos = df_nulos.loc[df_nulos["cidade"] == cidade, "nulos"].sum()
+    return nulos
+
+
+def validos(cidade):
+    url_validos = os.getenv("BRANCOS_NULOS")
+    validos = requests.get(url_validos).json()
+    df_validos = pd.DataFrame(validos)
+    validos = df_validos.loc[df_validos["cidade"] == cidade, "validos"].sum()
+    return validos
+
+
 def toggle_modal(n1, is_open):
     if n1:
         return not is_open
@@ -154,7 +178,7 @@ app.layout = html.Div(
 
         html.Div([dbc.Modal(
             [
-                dbc.Button("print", id="print-btn"),
+
                 dbc.ModalHeader(html.Div([
                     dbc.Row([
                         dbc.Col([
@@ -177,6 +201,9 @@ app.layout = html.Div(
             size="lg",
             is_open=False,
         ), ]),
+        html.Script(
+            id="script"
+        ),
         html.Div([], id="dummy"),
         dcc.Interval(
             id='interval-component',
@@ -360,7 +387,7 @@ def update_nome_cidade(value):
     Input("dropdown-cidade", "value"),
 )
 def update_votos_brancos(value):
-    return (df_brancos_nulos[df_brancos_nulos["cidade"] == value]["brancos"].sum(),)
+    return brancos(value),
 
 
 @app.callback(
@@ -368,7 +395,7 @@ def update_votos_brancos(value):
     Input("dropdown-cidade", "value"),
 )
 def update_votos_nulos(value):
-    return (df_brancos_nulos[df_brancos_nulos["cidade"] == value]["nulos"].sum(),)
+    return nulos(value),
 
 
 @app.callback(
@@ -376,7 +403,7 @@ def update_votos_nulos(value):
     Input("dropdown-cidade", "value"),
 )
 def update_votos_validos(value):
-    return (dft[dft["cidade"] == value]["votos"].sum(),)
+    return validos(value),
 
 
 @app.callback(Output("grid", "children"), Input("dropdown-cidade", "value"),
@@ -399,13 +426,17 @@ def open_modal(n1, cidade, regiao, is_open):
     return toggle_modal(n1, is_open), update_table(cidade, regiao)
 
 
-# @app.callback(Output("dummy", "children"), Input("print-btn", "n_clicks"),)
-# app.clientside_callback(
-#     """
-#         document.getElementById("print-btn").addEventListener("click", function() {
-#             window.print();
-#         });
-#         """
-# )
+@app.callback(Output("script", "children"), Input("print-btn", "n_clicks"),)
+def print(n):
+    if n:
+        return """
+            <script>
+                    window.print();
+            </script>
+        """
+    else:
+        return None
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
