@@ -36,14 +36,6 @@ df_pleitos = pd.DataFrame(pleitos)
 filejson = open("geodata/to.json")
 geojson = json.load(filejson)
 
-total_circulos = 150
-circulos_amarelos = 100
-
-components = [candidatos(), bus(
-    total_circulos, circulos_amarelos)]
-
-url_resultado = os.getenv("RESULTADOS")
-
 
 def update_table(cidade, regiao):
     url_resultado = os.getenv("RESULTADOS")+str(cidade)+"/"
@@ -65,13 +57,71 @@ def update_table(cidade, regiao):
         columnSize="sizeToFit",
         style={"height": "360px", "width": "100%", "justify": "center"},
 
+    )
 
+
+def map(estado):
+    url_mapa = os.getenv("MAPA")
+    response = requests.get(url_mapa).json()
+    df = pd.DataFrame(response)
+    maps = {"TO": "geodata/to.json", }
+    center = {"TO": {"lat": -10.1837, "lon": -48.3338}, }
+    filejson = open(maps[estado])
+    geojson = json.load(filejson)
+    df["percentual"] = round((df["bu_recebidos"]/df["qtd_total_urnas"])*100, 2)
+    fig = px.choropleth_mapbox(
+        df,
+        geojson=geojson,
+        locations="cod_ibge",
+        featureidkey="properties.id",
+        color="percentual",
+        hover_name="cidade",
+        title="Mapa do Tocantins",
+        color_continuous_scale="Viridis",
+        opacity=1,
+        mapbox_style="carto-positron",
+        zoom=4.8,
+        center=center[estado],
+        range_color=[0, 100],
+    )
+
+    fig.update_geos(
+        visible=True,
+        resolution=110,
+        showcountries=False,
+        showcoastlines=False,
+        showland=False,
+        fitbounds="locations",
+    )
+
+    fig.update_layout(
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        coloraxis_colorbar=dict(title="Contagem de Urnas"),
 
     )
+
+    return fig
+
+
+def bus_page(cidade):
+    env_bu = os.getenv("BU")
+    url_bus = env_bu.format(
+        cidade=cidade
+    )
+    response = requests.get(url_bus).json()
+    df = pd.DataFrame(response)
+    qtd_urna = df["qtd_total_urnas"].values
+    bu_recebidos = df["bu_recebidos"].values
+    return bus(qtd_urna[0], bu_recebidos[0])
 
 
 app.layout = html.Div(
     [
+        dcc.Interval(
+            id='interval-component',
+            interval=60 * 1000,
+            n_intervals=0
+        ),
         dbc.Navbar(
             dbc.Container(
                 [
@@ -228,57 +278,26 @@ def load_regiao(cidade):
     return options, regiao[0]
 
 
-@app.callback(Output("components", "children"), Input("radio", "value"))
-def update_components(value):
-    return components[value]
+@app.callback(Output("components", "children"), Input("radio", "value"),
+              Input("dropdown-cidade", "value"),  Input('interval-component', 'n_intervals'))
+def update_components(value, cidade, n):
+    if value == 0:
+        return candidatos()
+    if value == 1:
+        return bus_page(cidade)
 
 
-@app.callback(Output("map", "figure"), Input("dropdown-estado", "value"))
-def update_map(estado):
-    url_mapa = os.getenv("MAPA")
-    response = requests.get(url_mapa).json()
-    df = pd.DataFrame(response)
-    maps = {"TO": "geodata/to.json", }
-    center = {"TO": {"lat": -10.1837, "lon": -48.3338}, }
-    filejson = open(maps[estado])
-    geojson = json.load(filejson)
-    df["percentual"] = round((df["bu_recebidos"]/df["qtd_total_urnas"])*100, 2)
-    fig = px.choropleth_mapbox(
-        df,
-        geojson=geojson,
-        locations="cod_ibge",
-        featureidkey="properties.id",
-        color="percentual",
-        hover_name="cidade",
-        title="Mapa do Tocantins",
-        color_continuous_scale="Viridis",
-        opacity=1,
-        mapbox_style="carto-positron",
-        zoom=4.8,
-        center=center[estado],
-        range_color=[0, 100],
-    )
-
-    fig.update_geos(
-        visible=True,
-        resolution=110,
-        showcountries=False,
-        showcoastlines=False,
-        showland=False,
-        fitbounds="locations",
-    )
-
-    fig.update_layout(
-        margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        coloraxis_colorbar=dict(title="Contagem de Urnas"),
-
-    )
-
-    return fig
+@app.callback(Output("map", "figure"), Input("dropdown-estado", "value"),
+              Input('interval-component', 'n_intervals'))
+def update_map(estado, n):
+    return map(estado)
 
 
 @app.callback(Output("nome_cidade", "children"), Input("dropdown-cidade", "value"))
 def update_nome_cidade(value):
+    '''
+    TODO:: FIX THIS
+    '''
     return value
 
 
@@ -307,8 +326,9 @@ def update_votos_validos(value):
 
 
 @app.callback(Output("grid", "children"), Input("dropdown-cidade", "value"),
-              Input("dropdown-regiao", "value"))
-def update_resultado(cidade, regiao):
+              Input("dropdown-regiao", "value"),
+              Input('interval-component', 'n_intervals'))
+def update_resultado(cidade, regiao, n):
     return update_table(cidade, regiao)
 
 
