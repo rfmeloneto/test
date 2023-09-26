@@ -42,15 +42,15 @@ circulos_amarelos = 100
 components = [candidatos(), bus(
     total_circulos, circulos_amarelos)]
 
-url_resultado = os.getenv("RESULTADOS")+"1/"
-print(url_resultado)
+url_resultado = os.getenv("RESULTADOS")
 
 
 def update_table(cidade, regiao):
     url_resultado = os.getenv("RESULTADOS")+str(cidade)+"/"
     resultato = requests.get(url_resultado).json()
     dft = pd.DataFrame(resultato)
-    df_city = dft[(dft["cidade"] == "Palmas") & (dft["regiao"] == regiao)].sort_values(
+    cidade_str = dft["cidade"].unique()
+    df_city = dft[(dft["cidade"] == cidade_str[0]) & (dft["regiao"] == regiao)].sort_values(
         by="votos", ascending=False)
     colocados = [i+1 for i in range(0, len(df_city["candidato"].unique()))]
     df_city['colocacao'] = colocados
@@ -203,6 +203,7 @@ app.layout = html.Div(
 # Atualização das cidades de acordo com o estado
 @app.callback(
     Output('dropdown-cidade', 'options'),
+    Output('dropdown-cidade', 'value'),
     Input('dropdown-estado', 'value')
 )
 def load_city(uf):
@@ -210,20 +211,21 @@ def load_city(uf):
     id = df_pleitos[df_pleitos['uf'] == uf]['id'].unique()
     options = [{"label": cidades[i], "value": id[i]}
                for i in range(len(cidades))]
-    return options
+    return options, id[0]
 
 # Atualização das regiões de acordo com a cidade
 
 
 @app.callback(
     Output('dropdown-regiao', 'options'),
+    Output('dropdown-regiao', 'value'),
     Input('dropdown-cidade', 'value')
 )
 def load_regiao(cidade):
     regioes = df_pleitos[df_pleitos['id'] == cidade]['regiao']
     regiao = ast.literal_eval(regioes[0])
     options = [{"label": r, "value": r} for r in regiao]
-    return options
+    return options, regiao[0]
 
 
 @app.callback(Output("components", "children"), Input("radio", "value"))
@@ -233,18 +235,20 @@ def update_components(value):
 
 @app.callback(Output("map", "figure"), Input("dropdown-estado", "value"))
 def update_map(estado):
-    maps = {"TO": "geodata/to.json",
-            "PE": "geodata/pe.json", "RN": "geodata/rn.json"}
-    center = {"TO": {"lat": -10.1837, "lon": -48.3338}, "PE": {"lat":
-                                                               -7.1173, "lon": -34.8631}, "RN": {"lat": -5.7793, "lon": -35.2009}}
+    url_mapa = os.getenv("MAPA")
+    response = requests.get(url_mapa).json()
+    df = pd.DataFrame(response)
+    maps = {"TO": "geodata/to.json", }
+    center = {"TO": {"lat": -10.1837, "lon": -48.3338}, }
     filejson = open(maps[estado])
     geojson = json.load(filejson)
+    df["percentual"] = round((df["bu_recebidos"]/df["qtd_total_urnas"])*100, 2)
     fig = px.choropleth_mapbox(
         df,
         geojson=geojson,
-        locations="cidade",
-        featureidkey="properties.name",
-        color="urnas",
+        locations="cod_ibge",
+        featureidkey="properties.id",
+        color="percentual",
         hover_name="cidade",
         title="Mapa do Tocantins",
         color_continuous_scale="Viridis",
@@ -252,6 +256,7 @@ def update_map(estado):
         mapbox_style="carto-positron",
         zoom=4.8,
         center=center[estado],
+        range_color=[0, 100],
     )
 
     fig.update_geos(
@@ -301,7 +306,8 @@ def update_votos_validos(value):
     return (dft[dft["cidade"] == value]["votos"].sum(),)
 
 
-@app.callback(Output("grid", "children"), Input("dropdown-cidade", "value"), Input("dropdown-regiao", "value"))
+@app.callback(Output("grid", "children"), Input("dropdown-cidade", "value"),
+              Input("dropdown-regiao", "value"))
 def update_resultado(cidade, regiao):
     return update_table(cidade, regiao)
 
