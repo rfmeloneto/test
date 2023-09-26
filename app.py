@@ -10,7 +10,7 @@ import plotly.express as px
 import dash_ag_grid as dag
 
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dotenv import load_dotenv
 
 from pages.page_candidatos import candidatos
@@ -25,17 +25,35 @@ app._favicon = "asserts/favicon.ico"
 
 load_dotenv()
 
-# DataSource dos Pleitos - Carrega os inputs de Estado, Cidade e Região
-url_pleitos = os.getenv("PLEITOS_ATIVOS")
-pleitos = requests.get(url_pleitos).json()
-df_pleitos = pd.DataFrame(pleitos)
+
+def update_estado():
+    url_pleitos = os.getenv("PLEITOS_ATIVOS")
+    pleitos = requests.get(url_pleitos).json()
+    df_pleitos = pd.DataFrame(pleitos)
+    opcoes = [{"label": e, "value": uf} for e, uf in zip(
+        df_pleitos["estado"].unique(), df_pleitos["uf"].unique())]
+    return opcoes, df_pleitos["uf"].unique()[0]
 
 
-# DataSource dos Candidatos - Carrega as informações dos Resultados
+def update_cidade(uf):
+    url_pleitos = os.getenv("PLEITOS_ATIVOS")
+    pleitos = requests.get(url_pleitos).json()
+    df_pleitos = pd.DataFrame(pleitos)
+    cidades = df_pleitos[df_pleitos['uf'] == uf]['cidade'].unique()
+    id = df_pleitos[df_pleitos['uf'] == uf]['id'].unique()
+    options = [{"label": cidades[i], "value": id[i]}
+               for i in range(len(cidades))]
+    return options, id[0]
 
 
-filejson = open("geodata/to.json")
-geojson = json.load(filejson)
+def update_regiao(cidade):
+    url_pleitos = os.getenv("PLEITOS_ATIVOS")
+    pleitos = requests.get(url_pleitos).json()
+    df_pleitos = pd.DataFrame(pleitos)
+    regioes = df_pleitos.loc[df_pleitos['id'] == cidade, 'regiao']
+    regiao = ast.literal_eval(regioes.iloc[0])
+    options = [{"label": r, "value": r} for r in regiao]
+    return options, regiao[0]
 
 
 def update_table(cidade, regiao):
@@ -116,8 +134,40 @@ def bus_page(cidade):
     return bus(qtd_urna[0], bu_recebidos[0])
 
 
+def toggle_modal(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
+
+
 app.layout = html.Div(
     [
+        dbc.Button("Extra large modal", id="open-xl", n_clicks=0),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(html.Div([
+                    dbc.Row([
+                        dbc.Col([
+                            html.Img(src="assets/integravoto.svg"),
+                        ]),
+                        dbc.Col([
+                            dbc.Row(
+                                html.H6("Sistema de Gerenciamento de Totalização")),
+                            dbc.Row(
+                                html.H6("Eleição de Conselho Tutelar - 2023")),
+
+                        ])
+
+                    ]
+                    )
+                ])),
+                dbc.ModalBody([], id="grid-modal"),
+            ],
+            id="modal-xl",
+            size="xl",
+            is_open=False,
+        ),
+
         dcc.Interval(
             id='interval-component',
             interval=60 * 1000,
@@ -160,12 +210,8 @@ app.layout = html.Div(
             dbc.Col([
                 dcc.Dropdown(
                     id="dropdown-estado",
-                    options=[
-                        {"label": estado, "value": uf} for estado, uf in zip(df_pleitos["estado"].unique(), df_pleitos["uf"].unique())
-                    ],
-
                     className="p-4",
-                    value="TO",),
+                ),
             ]),
             dbc.Col([
                     dcc.Dropdown(
@@ -187,7 +233,6 @@ app.layout = html.Div(
 
         ]),
         html.Br(),
-
         dbc.Row(
             [
                 dbc.Col(
@@ -251,20 +296,22 @@ app.layout = html.Div(
 )
 
 
+@app.callback(
+    Output("dropdown-estado", "options"),
+    Output("dropdown-estado", "value"),
+    Input('interval-component', 'n_intervals'))
+def load_estado(n):
+    return update_estado()
+
+
 # Atualização das cidades de acordo com o estado
 @app.callback(
     Output('dropdown-cidade', 'options'),
     Output('dropdown-cidade', 'value'),
-    Input('dropdown-estado', 'value')
+    Input('dropdown-estado', 'value'),
 )
 def load_city(uf):
-    cidades = df_pleitos[df_pleitos['uf'] == uf]['cidade'].unique()
-    id = df_pleitos[df_pleitos['uf'] == uf]['id'].unique()
-    options = [{"label": cidades[i], "value": id[i]}
-               for i in range(len(cidades))]
-    return options, id[0]
-
-# Atualização das regiões de acordo com a cidade
+    return update_cidade(uf)
 
 
 @app.callback(
@@ -273,10 +320,7 @@ def load_city(uf):
     Input('dropdown-cidade', 'value')
 )
 def load_regiao(cidade):
-    regioes = df_pleitos.loc[df_pleitos['id'] == cidade, 'regiao']
-    regiao = ast.literal_eval(regioes.iloc[0])
-    options = [{"label": r, "value": r} for r in regiao]
-    return options, regiao[0]
+    return update_regiao(cidade)
 
 
 @app.callback(Output("components", "children"), Input("radio", "value"),
@@ -331,6 +375,20 @@ def update_votos_validos(value):
               Input('interval-component', 'n_intervals'))
 def update_resultado(cidade, regiao, n):
     return update_table(cidade, regiao)
+
+
+@app.callback(
+    Output("modal-xl", "is_open"),
+    Output("grid-modal", "children"),
+    Input("open-xl", "n_clicks"),
+    Input("dropdown-cidade", "value"),
+    Input("dropdown-regiao", "value"),
+    State("modal-xl", "is_open"),
+    prevent_initial_call=True
+)
+def open_modal(n1, cidade, regiao, is_open):
+    if n1:
+        return not is_open, update_table(cidade, regiao),
 
 
 if __name__ == "__main__":
