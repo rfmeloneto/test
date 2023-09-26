@@ -381,14 +381,13 @@ def update_resultado(cidade, regiao, n):
     Output("modal-xl", "is_open"),
     Output("grid-modal", "children"),
     Input("open-xl", "n_clicks"),
-    Input("dropdown-cidade", "value"),
-    Input("dropdown-regiao", "value"),
+    State("dropdown-cidade", "value"),
+    State("dropdown-regiao", "value"),
     State("modal-xl", "is_open"),
     prevent_initial_call=True
 )
 def open_modal(n1, cidade, regiao, is_open):
-    if n1:
-        return not is_open, update_table(cidade, regiao),
+    return toggle_modal(n1, is_open), update_table(cidade, regiao)
 
 
 if __name__ == "__main__":
